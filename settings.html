@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mint Startpage · Settings</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Settings</h1>
+        <button id="back" class="secondary">← Back</button>
+      </header>
+
+      <section>
+        <h2>Background</h2>
+
+        <div class="option">
+          <label>Solid color</label>
+          <input type="color" id="solidColor" />
+          <span class="option-description"
+            >Select a color for the background</span
+          >
+        </div>
+
+        <div class="option">
+          <label>CSS gradient</label>
+          <div class="gradient-builder">
+            <div class="gradient-colors">
+              <div class="gradient-color-input">
+                <label>Color 1</label>
+                <input type="color" id="gradientColor1" value="#9bfab0" />
+              </div>
+              <div class="gradient-color-input">
+                <label>Color 2</label>
+                <input type="color" id="gradientColor2" value="#2dd4bf" />
+              </div>
+            </div>
+
+            <div class="gradient-angle">
+              <label>Angle:</label>
+              <input
+                type="range"
+                id="gradientAngle"
+                min="0"
+                max="360"
+                value="135"
+              />
+              <span id="angleValue">135°</span>
+            </div>
+
+            <div class="gradient-preview" id="gradientPreview"></div>
+
+            <button id="applyGradient" class="secondary">Apply gradient</button>
+          </div>
+          <span class="option-description">Or enter a custom gradient:</span>
+          <input
+            type="text"
+            id="customGradient"
+            placeholder="linear-gradient(135deg, #9bfab0, #2dd4bf)"
+          />
+        </div>
+
+        <div class="option">
+          <label>Local image</label>
+          <input type="file" id="image" accept="image/*" />
+          <span class="option-description"
+            >Select an image from your computer</span
+          >
+        </div>
+      </section>
+
+      <section>
+        <h2>Data</h2>
+
+        <div class="button-group">
+          <button id="exportData">Export configuration</button>
+
+          <label class="import">
+            Import configuration
+            <input
+              type="file"
+              id="importData"
+              accept="application/json"
+              hidden
+            />
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <h2>Reset</h2>
+
+        <div class="option">
+          <label>Restore default settings</label>
+          <span class="option-description">
+            This will delete all your groups, links and custom settings.
+          </span>
+        </div>
+
+        <button id="resetData" class="danger">Reset all</button>
+      </section>
+    </div>
+
+    <script type="module" src="settings.js"></script>
+  </body>
+</html>

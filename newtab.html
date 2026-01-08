@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mint Startpage</title>
+    <link rel="stylesheet" href="newtab.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div title="Mint Startpage">
+        <img src="assets/icons/icon128.png" width="24" />
+      </div>
+
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search links..."
+        />
+      </div>
+
+      <div class="header-right">
+        <button id="addGroupBtn">+ Group</button>
+        <button id="openSettings" title="Settings">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v6m0 6v6M1 12h6m6 0h6m-2.3-8.5l4.2 4.2M6.3 17.7l4.2 4.2m0-15.8l4.2-4.2M6.3 6.3l4.2-4.2"
+            />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="groups-container" id="groupsContainer"></main>
+
+    <!-- Modal for add/edit group -->
+    <div class="modal-overlay" id="groupModal">
+      <div class="modal">
+        <h2 id="groupModalTitle">New Group</h2>
+        <div class="modal-field">
+          <label for="groupTitleInput">Group name</label>
+          <input
+            type="text"
+            id="groupTitleInput"
+            placeholder="e.g. Social Media"
+          />
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" id="cancelGroupModal">
+            Cancel
+          </button>
+          <button class="modal-btn modal-btn-primary" id="saveGroupModal">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for add/edit link -->
+    <div class="modal-overlay" id="linkModal">
+      <div class="modal">
+        <h2 id="linkModalTitle">New Link</h2>
+        <div class="modal-field">
+          <label for="linkTitleInput">Title</label>
+          <input type="text" id="linkTitleInput" placeholder="e.g. YouTube" />
+        </div>
+        <div class="modal-field">
+          <label for="linkUrlInput">URL</label>
+          <input
+            type="url"
+            id="linkUrlInput"
+            placeholder="https://example.com"
+          />
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" id="cancelLinkModal">
+            Cancel
+          </button>
+          <button class="modal-btn modal-btn-primary" id="saveLinkModal">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="newtab.js"></script>
+  </body>
+</html>
