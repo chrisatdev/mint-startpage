@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Mint Startpage",
-  "description": "Minimal startpage for managing links in groups.",
+  "description": "Minimal startpage to manage links in groups with modern design and customization.",
   "version": "1.0.0",
   "chrome_url_overrides": {
     "newtab": "newtab.html"

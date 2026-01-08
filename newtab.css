@@ -448,3 +448,38 @@ body {
 .hidden {
   display: none;
 }
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: auto;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.footer a {
+  color: rgba(15, 23, 42, 0.7);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: rgba(15, 23, 42, 0.9);
+  text-decoration: underline;
+}
+
+.footer-separator {
+  margin: 0 8px;
+  color: rgba(15, 23, 42, 0.4);
+}
+
+.footer-version {
+  color: rgba(15, 23, 42, 0.5);
+  font-size: 12px;
+}
