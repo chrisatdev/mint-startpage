@@ -13,6 +13,7 @@ const backBtn = document.getElementById("back");
 const exportBtn = document.getElementById("exportData");
 const importInput = document.getElementById("importData");
 const resetBtn = document.getElementById("resetData");
+const darkModeToggle = document.getElementById("darkModeToggle");
 
 let state;
 
@@ -20,6 +21,10 @@ init();
 
 async function init() {
   state = await loadData();
+
+  if (state.settings.darkMode) {
+    document.body.setAttribute("data-theme", "dark");
+  }
 
   if (state.settings.theme.type === "solid") {
     solidInput.value = state.settings.theme.value;
@@ -29,6 +34,8 @@ async function init() {
     customGradient.value = state.settings.theme.value;
     parseGradientIfPossible(state.settings.theme.value);
   }
+
+  darkModeToggle.checked = state.settings.darkMode || false;
 
   updateGradientPreview();
 }
@@ -128,6 +135,17 @@ imageInput.addEventListener("change", async (e) => {
   reader.readAsDataURL(file);
 });
 
+darkModeToggle.addEventListener("change", async () => {
+  state.settings.darkMode = darkModeToggle.checked;
+  await saveData(state);
+  
+  if (state.settings.darkMode) {
+    document.body.setAttribute("data-theme", "dark");
+  } else {
+    document.body.removeAttribute("data-theme");
+  }
+});
+
 // ==================== ACTUALIZAR TEMA ====================
 
 async function updateTheme(type, value) {
@@ -194,6 +212,14 @@ importInput.addEventListener("change", (e) => {
         parseGradientIfPossible(state.settings.theme.value);
         updateGradientPreview();
       }
+
+      darkModeToggle.checked = state.settings.darkMode || false;
+      
+      if (state.settings.darkMode) {
+        document.body.setAttribute("data-theme", "dark");
+      } else {
+        document.body.removeAttribute("data-theme");
+      }
     } catch {
       alert("Error reading file");
     }
@@ -207,6 +233,10 @@ function isValidImport(payload) {
   if (!payload.data) return false;
   if (!Array.isArray(payload.data.groups)) return false;
   if (!payload.data.settings?.theme) return false;
+
+  if (payload.data.settings.darkMode !== undefined) {
+    if (typeof payload.data.settings.darkMode !== "boolean") return false;
+  }
 
   return true;
 }
@@ -238,7 +268,8 @@ resetBtn.addEventListener("click", async () => {
       theme: {
         type: "gradient",
         value: "linear-gradient(135deg, #9bfab0, #2dd4bf)"
-      }
+      },
+      darkMode: false
     },
     groups: []
   };
@@ -255,6 +286,8 @@ resetBtn.addEventListener("click", async () => {
   gradientColor2.value = "#2dd4bf";
   gradientAngle.value = "135";
   updateGradientPreview();
+  darkModeToggle.checked = false;
+  document.body.removeAttribute("data-theme");
   
   // Return to main page
   setTimeout(() => {

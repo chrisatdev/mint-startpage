@@ -3,7 +3,8 @@ const DEFAULT_DATA = {
     theme: {
       type: "gradient",
       value: "linear-gradient(135deg, #9bfab0, #2dd4bf)"
-    }
+    },
+    darkMode: false
   },
   groups: []
 };

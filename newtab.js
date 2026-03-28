@@ -641,6 +641,12 @@ function applyTheme() {
   if (theme.type === "image") {
     document.body.style.background = `url(${theme.value}) center / cover no-repeat`;
   }
+
+  if (state.settings.darkMode) {
+    document.body.setAttribute("data-theme", "dark");
+  } else {
+    document.body.removeAttribute("data-theme");
+  }
 }
 
 document.getElementById("openSettings")

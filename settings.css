@@ -8,6 +8,20 @@
   --btn-hover: #d1d5db;
   --container-bg: #ffffff;
   --shadow: rgba(0, 0, 0, 0.1);
+  --muted-text: #64748b;
+  --secondary-bg: #f8fafc;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --input-border: #475569;
+  --btn-bg: #334155;
+  --btn-hover: #475569;
+  --container-bg: #1e293b;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --muted-text: #94a3b8;
+  --secondary-bg: #334155;
 }
 
 * {
@@ -66,6 +80,16 @@ section h2 {
   gap: 8px;
 }
 
+.option:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.option:has(input[type="checkbox"]) .option-description {
+  margin-top: 0;
+}
+
 .option label {
   font-weight: 500;
   color: var(--text);
@@ -74,7 +98,7 @@ section h2 {
 
 .option-description {
   font-size: 13px;
-  color: #64748b;
+  color: var(--muted-text);
   margin-top: -4px;
 }
 
@@ -107,7 +131,7 @@ input[type="file"] {
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--secondary-bg);
   border-radius: 8px;
   border: 1px solid var(--input-border);
 }
@@ -126,7 +150,7 @@ input[type="file"] {
 
 .gradient-color-input label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--muted-text);
 }
 
 .gradient-angle {
