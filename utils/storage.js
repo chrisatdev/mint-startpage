@@ -4,7 +4,8 @@ const DEFAULT_DATA = {
       type: "gradient",
       value: "linear-gradient(135deg, #9bfab0, #2dd4bf)"
     },
-    darkMode: false
+    darkMode: false,
+    faviconMode: "favicon"
   },
   groups: []
 };
@@ -12,7 +13,11 @@ const DEFAULT_DATA = {
 export function loadData() {
   return new Promise((resolve) => {
     chrome.storage.local.get(["mintData"], (result) => {
-      resolve(result.mintData || DEFAULT_DATA);
+      const data = result.mintData || DEFAULT_DATA;
+      if (!data.settings.faviconMode) {
+        data.settings.faviconMode = "favicon";
+      }
+      resolve(data);
     });
   });
 }

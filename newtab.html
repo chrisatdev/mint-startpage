@@ -21,7 +21,7 @@
           type="text"
           class="search-input"
           id="searchInput"
-          placeholder="Search links..."
+          placeholder="Search links... (Enter to search Google)"
         />
       </div>
 
@@ -45,21 +45,28 @@
       </div>
     </header>
 
-    <main class="groups-container" id="groupsContainer"></main>
+    <div class="app-layout">
+      <nav class="sidebar" id="sidebar">
+        <div class="sidebar-tabs" id="sidebarTabs"></div>
+        <div class="sidebar-footer">
+          <a
+            href="https://github.com/chrisatdev/mint-startpage"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sidebar-footer-link"
+          >Mint Startpage</a>
+          <span class="sidebar-footer-version">v1.2.0</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </nav>
 
-    <footer class="footer">
-      <p>
-        <a
-          href="https://github.com/chrisatdev/mint-startpage"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Mint Startpage
-        </a>
-        <span class="footer-separator">·</span>
-        <span class="footer-version">v1.1.0</span>
-      </p>
-    </footer>
+      <main class="main-content" id="mainContent"></main>
+    </div>
+
 
     <!-- Modal for add/edit group -->
     <div class="modal-overlay" id="groupModal">
@@ -107,6 +114,42 @@
           <button class="modal-btn modal-btn-primary" id="saveLinkModal">
             Save
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard shortcuts overlay -->
+    <div class="shortcuts-overlay hidden" id="shortcutsOverlay">
+      <div class="shortcuts-modal">
+        <div class="shortcuts-header">
+          <span>Keyboard Shortcuts</span>
+          <button class="shortcuts-close" id="shortcutsClose">✕</button>
+        </div>
+        <div class="shortcuts-list">
+          <div class="shortcut-row">
+            <kbd>/</kbd>
+            <span>Focus search</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>Enter</kbd>
+            <span>Search on Google</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>Esc</kbd>
+            <span>Clear search</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>→</kbd>
+            <span>Next group</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>←</kbd>
+            <span>Previous group</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>?</kbd>
+            <span>Show / hide this panel</span>
+          </div>
         </div>
       </div>
     </div>

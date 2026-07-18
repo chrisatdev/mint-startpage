@@ -14,6 +14,7 @@ const exportBtn = document.getElementById("exportData");
 const importInput = document.getElementById("importData");
 const resetBtn = document.getElementById("resetData");
 const darkModeToggle = document.getElementById("darkModeToggle");
+const faviconModeRadios = document.querySelectorAll('[name="faviconMode"]');
 
 let state;
 
@@ -37,6 +38,11 @@ async function init() {
 
   darkModeToggle.checked = state.settings.darkMode || false;
 
+  const currentMode = state.settings.faviconMode || "favicon";
+  faviconModeRadios.forEach(radio => {
+    radio.checked = radio.value === currentMode;
+  });
+
   updateGradientPreview();
 }
 
@@ -52,7 +58,6 @@ function updateGradientPreview() {
   const color1 = gradientColor1.value;
   const color2 = gradientColor2.value;
   const angle = gradientAngle.value;
-  
   const gradientCSS = `linear-gradient(${angle}deg, ${color1}, ${color2})`;
   gradientPreview.style.background = gradientCSS;
   angleValue.textContent = `${angle}°`;
@@ -60,14 +65,12 @@ function updateGradientPreview() {
 
 gradientColor1.addEventListener("input", updateGradientPreview);
 gradientColor2.addEventListener("input", updateGradientPreview);
-
 gradientAngle.addEventListener("input", updateGradientPreview);
 
 applyGradientBtn.addEventListener("click", async () => {
   const color1 = gradientColor1.value;
   const color2 = gradientColor2.value;
   const angle = gradientAngle.value;
-  
   const gradientCSS = `linear-gradient(${angle}deg, ${color1}, ${color2})`;
   customGradient.value = gradientCSS;
   await updateTheme("gradient", gradientCSS);
@@ -82,43 +85,33 @@ customGradient.addEventListener("change", async () => {
 });
 
 function parseGradientIfPossible(gradientString) {
-  // Intentar parsear el gradiente para pre-llenar los controles
   const linearMatch = gradientString.match(/linear-gradient\((\d+)deg,\s*([^,]+),\s*([^)]+)\)/);
-  
   if (linearMatch) {
     const [, angle, color1, color2] = linearMatch;
-    
     gradientAngle.value = angle;
     angleValue.textContent = `${angle}°`;
-    
-    // Intentar convertir los colores a hex si es posible
     try {
       gradientColor1.value = convertToHex(color1.trim());
       gradientColor2.value = convertToHex(color2.trim());
     } catch {
-      // Si no se puede convertir, mantener los valores actuales
+      // keep current values if conversion fails
     }
   }
 }
 
 function convertToHex(color) {
-  // Crear un elemento temporal para convertir el color
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.style.color = color;
   document.body.appendChild(div);
-  
   const computed = window.getComputedStyle(div).color;
   document.body.removeChild(div);
-  
-  // Extraer RGB
   const rgb = computed.match(/\d+/g);
   if (rgb) {
-    const r = parseInt(rgb[0]).toString(16).padStart(2, '0');
-    const g = parseInt(rgb[1]).toString(16).padStart(2, '0');
-    const b = parseInt(rgb[2]).toString(16).padStart(2, '0');
+    const r = parseInt(rgb[0]).toString(16).padStart(2, "0");
+    const g = parseInt(rgb[1]).toString(16).padStart(2, "0");
+    const b = parseInt(rgb[2]).toString(16).padStart(2, "0");
     return `#${r}${g}${b}`;
   }
-  
   return color;
 }
 
@@ -127,7 +120,6 @@ function convertToHex(color) {
 imageInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = async () => {
     await updateTheme("image", reader.result);
@@ -135,15 +127,27 @@ imageInput.addEventListener("change", async (e) => {
   reader.readAsDataURL(file);
 });
 
+// ==================== DARK MODE ====================
+
 darkModeToggle.addEventListener("change", async () => {
   state.settings.darkMode = darkModeToggle.checked;
   await saveData(state);
-  
   if (state.settings.darkMode) {
     document.body.setAttribute("data-theme", "dark");
   } else {
     document.body.removeAttribute("data-theme");
   }
+});
+
+// ==================== FAVICON MODE ====================
+
+faviconModeRadios.forEach(radio => {
+  radio.addEventListener("change", async () => {
+    if (radio.checked) {
+      state.settings.faviconMode = radio.value;
+      await saveData(state);
+    }
+  });
 });
 
 // ==================== ACTUALIZAR TEMA ====================
@@ -174,12 +178,10 @@ exportBtn.addEventListener("click", async () => {
   );
 
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
-  a.download = `mint-startpage-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `mint-startpage-backup-${new Date().toISOString().split("T")[0]}.json`;
   a.click();
-
   URL.revokeObjectURL(url);
 });
 
@@ -200,11 +202,11 @@ importInput.addEventListener("change", (e) => {
       }
 
       state = parsed.data;
+      if (!state.settings.faviconMode) state.settings.faviconMode = "favicon";
       await saveData(state);
 
       alert("Configuration imported successfully");
-      
-      // Actualizar la UI
+
       if (state.settings.theme.type === "solid") {
         solidInput.value = state.settings.theme.value;
       } else if (state.settings.theme.type === "gradient") {
@@ -214,12 +216,17 @@ importInput.addEventListener("change", (e) => {
       }
 
       darkModeToggle.checked = state.settings.darkMode || false;
-      
+
       if (state.settings.darkMode) {
         document.body.setAttribute("data-theme", "dark");
       } else {
         document.body.removeAttribute("data-theme");
       }
+
+      const currentMode = state.settings.faviconMode || "favicon";
+      faviconModeRadios.forEach(radio => {
+        radio.checked = radio.value === currentMode;
+      });
     } catch {
       alert("Error reading file");
     }
@@ -233,11 +240,9 @@ function isValidImport(payload) {
   if (!payload.data) return false;
   if (!Array.isArray(payload.data.groups)) return false;
   if (!payload.data.settings?.theme) return false;
-
   if (payload.data.settings.darkMode !== undefined) {
     if (typeof payload.data.settings.darkMode !== "boolean") return false;
   }
-
   return true;
 }
 
@@ -251,25 +256,16 @@ resetBtn.addEventListener("click", async () => {
     "- Custom theme configuration\n\n" +
     "This action cannot be undone."
   );
-
   if (!confirmation) return;
 
-  // Second confirmation
-  const finalConfirmation = confirm(
-    "This is your last chance.\n\n" +
-    "Do you really want to continue?"
-  );
-
+  const finalConfirmation = confirm("This is your last chance.\n\nDo you really want to continue?");
   if (!finalConfirmation) return;
 
-  // Reset to default values
   const DEFAULT_DATA = {
     settings: {
-      theme: {
-        type: "gradient",
-        value: "linear-gradient(135deg, #9bfab0, #2dd4bf)"
-      },
-      darkMode: false
+      theme: { type: "gradient", value: "linear-gradient(135deg, #9bfab0, #2dd4bf)" },
+      darkMode: false,
+      faviconMode: "favicon"
     },
     groups: []
   };
@@ -279,7 +275,6 @@ resetBtn.addEventListener("click", async () => {
 
   alert("Settings reset successfully");
 
-  // Update UI
   solidInput.value = "#ecfeff";
   customGradient.value = DEFAULT_DATA.settings.theme.value;
   gradientColor1.value = "#9bfab0";
@@ -288,8 +283,8 @@ resetBtn.addEventListener("click", async () => {
   updateGradientPreview();
   darkModeToggle.checked = false;
   document.body.removeAttribute("data-theme");
-  
-  // Return to main page
+  faviconModeRadios.forEach(radio => { radio.checked = radio.value === "favicon"; });
+
   setTimeout(() => {
     window.open("newtab.html", "_self");
   }, 1000);

@@ -1,7 +1,5 @@
-# CHANGELOG
+# Changelog
 
-## [Unreleased] - marzo 2026
-### Style
-- [style] improve code styling (8 files) by @Christian Benitez
-### Added
-- New changelog for marzo 2026
+## 2026-07-17
+
+- chore: update 12 files

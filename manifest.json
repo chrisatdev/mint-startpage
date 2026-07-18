@@ -2,12 +2,20 @@
   "manifest_version": 3,
   "name": "Mint Startpage",
   "description": "Minimal startpage to manage links in groups with modern design and customization.",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "assets/icons/icon128.png"
+    },
+    "default_title": "Save to Mint Startpage"
+  },
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ],
   "icons": {
     "128": "assets/icons/icon128.png"
