@@ -5,6 +5,7 @@ const sidebarTabs = document.getElementById("sidebarTabs");
 const sidebarToggle = document.getElementById("sidebarToggle");
 const mainContent = document.getElementById("mainContent");
 const addGroupBtn = document.getElementById("addGroupBtn");
+const addLinkBtn = document.getElementById("addLinkBtn");
 const searchInput = document.getElementById("searchInput");
 
 const groupModal = document.getElementById("groupModal");
@@ -15,6 +16,7 @@ const cancelGroupModal = document.getElementById("cancelGroupModal");
 
 const linkModal = document.getElementById("linkModal");
 const linkModalTitle = document.getElementById("linkModalTitle");
+const linkGroupSelect = document.getElementById("linkGroupSelect");
 const linkTitleInput = document.getElementById("linkTitleInput");
 const linkUrlInput = document.getElementById("linkUrlInput");
 const saveLinkModal = document.getElementById("saveLinkModal");
@@ -27,6 +29,7 @@ let activeGroupId = null;
 let draggedGroupId = null;
 let draggedLinkData = null;
 let currentGroupIdForModal = null;
+let currentSourceGroupIdForModal = null;
 let currentLinkIdForModal = null;
 let openMenuLinkId = null;
 
@@ -71,9 +74,7 @@ function getGroupColor(id) {
 function renderSidebar() {
   sidebarTabs.innerHTML = "";
 
-  state.groups
-    .slice()
-    .sort((a, b) => a.order - b.order)
+  getOrderedGroups()
     .forEach(group => {
       const tab = document.createElement("button");
       tab.className = "sidebar-tab" + (group.id === activeGroupId ? " active" : "");
@@ -95,6 +96,7 @@ function renderSidebar() {
         searchInput.value = "";
         renderSidebar();
         renderMainContent();
+        requestAnimationFrame(() => scrollToGroup(group.id));
       });
 
       sidebarTabs.appendChild(tab);
@@ -113,6 +115,8 @@ function getOrderedGroups() {
 }
 
 function navigateGroup(direction) {
+  if (searchInput.value.trim()) return false;
+
   const groups = getOrderedGroups();
   const currentIndex = groups.findIndex(g => g.id === activeGroupId);
   if (currentIndex === -1) return false;
@@ -122,10 +126,38 @@ function navigateGroup(direction) {
 
   activeGroupId = groups[nextIndex].id;
   localStorage.setItem("activeGroupId", activeGroupId);
-  searchInput.value = "";
   renderSidebar();
-  renderMainContent();
+  scrollToGroup(activeGroupId);
   return true;
+}
+
+function scrollToGroup(groupId, behavior = "smooth") {
+  const section = mainContent.querySelector(`[data-group-section="${groupId}"]`);
+  if (!section) return;
+  section.scrollIntoView({ behavior, block: "start" });
+}
+
+function syncActiveGroupFromScroll() {
+  if (searchInput.value.trim()) return;
+
+  const sections = Array.from(mainContent.querySelectorAll("[data-group-section]"));
+  if (sections.length === 0) return;
+
+  let currentSection = sections[0];
+  for (const section of sections) {
+    if (section.offsetTop - mainContent.scrollTop <= 80) {
+      currentSection = section;
+    } else {
+      break;
+    }
+  }
+
+  const nextActiveId = currentSection.dataset.groupSection;
+  if (nextActiveId && nextActiveId !== activeGroupId) {
+    activeGroupId = nextActiveId;
+    localStorage.setItem("activeGroupId", activeGroupId);
+    renderSidebar();
+  }
 }
 
 function openShortcutsOverlay() {
@@ -163,42 +195,49 @@ function renderMainContent(searchTerm = "") {
     return;
   }
 
-  const group = state.groups.find(g => g.id === activeGroupId);
-  if (!group) return;
+  getOrderedGroups().forEach((group) => {
+    const section = document.createElement("section");
+    section.className = "group-section";
+    section.dataset.groupSection = group.id;
 
-  const panelHeader = document.createElement("div");
-  panelHeader.className = "panel-header";
-  panelHeader.innerHTML = `
-    <span class="panel-title">${escapeHtml(group.title)}</span>
-    <div class="panel-actions">
-      <button class="panel-btn" id="editGroupBtn" title="Rename group">Rename</button>
-      <button class="panel-btn panel-btn-danger" id="deleteGroupBtn" title="Delete group">Delete</button>
-    </div>
-  `;
-  mainContent.appendChild(panelHeader);
+    const panelHeader = document.createElement("div");
+    panelHeader.className = "panel-header";
+    panelHeader.innerHTML = `
+      <div class="group-section-heading">
+        <span class="group-section-dot" style="background:${getGroupColor(group.id)}"></span>
+        <span class="panel-title">${escapeHtml(group.title)}</span>
+      </div>
+      <div class="panel-actions">
+        <button class="panel-btn" data-edit-group="${group.id}" title="Rename group">Rename</button>
+        <button class="panel-btn panel-btn-danger" data-delete-group="${group.id}" title="Delete group">Delete</button>
+      </div>
+    `;
+    section.appendChild(panelHeader);
 
-  panelHeader.querySelector("#editGroupBtn").addEventListener("click", () => openGroupModalForEdit(group.id));
-  panelHeader.querySelector("#deleteGroupBtn").addEventListener("click", () => removeGroup(group.id));
+    const list = document.createElement("div");
+    list.className = "links-list";
+    list.dataset.group = group.id;
 
-  const list = document.createElement("div");
-  list.className = "links-list";
-  list.dataset.group = group.id;
+    group.links.forEach((link, index) => {
+      list.appendChild(createLinkElement(link, group.id, index));
+    });
 
-  group.links.forEach((link, index) => {
-    list.appendChild(createLinkElement(link, group.id, index));
+    section.appendChild(list);
+
+    mainContent.appendChild(section);
   });
 
-  mainContent.appendChild(list);
+  document.querySelectorAll("[data-edit-group]").forEach(btn => {
+    btn.addEventListener("click", () => openGroupModalForEdit(btn.dataset.editGroup));
+  });
 
-  const addBtn = document.createElement("button");
-  addBtn.className = "add-link";
-  addBtn.dataset.group = group.id;
-  addBtn.textContent = "+ Add link";
-  addBtn.addEventListener("click", () => openLinkModalForNew(group.id));
-  mainContent.appendChild(addBtn);
+  document.querySelectorAll("[data-delete-group]").forEach(btn => {
+    btn.addEventListener("click", () => removeGroup(btn.dataset.deleteGroup));
+  });
 
   bindLinkDragEvents();
   bindLinkMenuEvents();
+  requestAnimationFrame(() => syncActiveGroupFromScroll());
 }
 
 function renderSearchResults(searchTerm) {
@@ -332,10 +371,17 @@ function openGroupModalForEdit(groupId) {
 }
 
 function openLinkModalForNew(groupId) {
+  if (state.groups.length === 0) {
+    alert("Create a group first");
+    return;
+  }
+
   linkModalTitle.textContent = "New Link";
   linkTitleInput.value = "";
   linkUrlInput.value = "";
-  currentGroupIdForModal = groupId;
+  populateLinkGroupSelect(groupId || activeGroupId || getOrderedGroups()[0]?.id || "");
+  currentGroupIdForModal = linkGroupSelect.value || groupId;
+  currentSourceGroupIdForModal = null;
   currentLinkIdForModal = null;
   showModal(linkModal);
   linkTitleInput.focus();
@@ -348,18 +394,37 @@ function openLinkModalForEdit(groupId, linkId) {
   linkModalTitle.textContent = "Edit Link";
   linkTitleInput.value = link.title;
   linkUrlInput.value = link.url;
+  populateLinkGroupSelect(groupId);
   currentGroupIdForModal = groupId;
+  currentSourceGroupIdForModal = groupId;
   currentLinkIdForModal = linkId;
   showModal(linkModal);
   linkTitleInput.focus();
+}
+
+function populateLinkGroupSelect(selectedGroupId = "") {
+  linkGroupSelect.innerHTML = "";
+
+  getOrderedGroups().forEach(group => {
+    const option = document.createElement("option");
+    option.value = group.id;
+    option.textContent = group.title;
+    if (group.id === selectedGroupId) option.selected = true;
+    linkGroupSelect.appendChild(option);
+  });
 }
 
 function showModal(modal) { modal.classList.add("active"); }
 function hideModal(modal) { modal.classList.remove("active"); }
 
 addGroupBtn.addEventListener("click", openGroupModalForNew);
+addLinkBtn.addEventListener("click", () => openLinkModalForNew(activeGroupId));
 cancelGroupModal.addEventListener("click", () => hideModal(groupModal));
 cancelLinkModal.addEventListener("click", () => hideModal(linkModal));
+
+linkGroupSelect.addEventListener("change", () => {
+  currentGroupIdForModal = linkGroupSelect.value;
+});
 
 saveGroupModal.addEventListener("click", async () => {
   const title = groupTitleInput.value.trim();
@@ -384,15 +449,24 @@ saveGroupModal.addEventListener("click", async () => {
 saveLinkModal.addEventListener("click", async () => {
   const title = linkTitleInput.value.trim();
   const url = linkUrlInput.value.trim();
+  const selectedGroupId = linkGroupSelect.value;
+  currentGroupIdForModal = selectedGroupId;
   if (!title || !url) return;
 
-  const group = state.groups.find(g => g.id === currentGroupIdForModal);
-  if (!group) return;
-
   if (currentLinkIdForModal) {
-    const link = group.links.find(l => l.id === currentLinkIdForModal);
-    if (link) { link.title = title; link.url = url; }
+    const sourceGroup = state.groups.find(g => g.id === currentSourceGroupIdForModal)
+      || state.groups.find(g => g.links.some(l => l.id === currentLinkIdForModal));
+    const targetGroup = state.groups.find(g => g.id === selectedGroupId);
+    const linkIndex = sourceGroup?.links.findIndex(l => l.id === currentLinkIdForModal) ?? -1;
+    if (!sourceGroup || !targetGroup || linkIndex === -1) return;
+
+    const [link] = sourceGroup.links.splice(linkIndex, 1);
+    link.title = title;
+    link.url = url;
+    targetGroup.links.push(link);
   } else {
+    const group = state.groups.find(g => g.id === currentGroupIdForModal);
+    if (!group) return;
     group.links.push({ id: crypto.randomUUID(), title, url, order: group.links.length });
   }
 
@@ -765,24 +839,6 @@ document.addEventListener("keydown", (e) => {
 
 // ==================== GROUP SCROLL NAVIGATION ====================
 
-let scrollNavCooldown = false;
-
-mainContent.addEventListener("wheel", (e) => {
-  if (scrollNavCooldown) return;
-
-  const atBottom = mainContent.scrollHeight - mainContent.scrollTop <= mainContent.clientHeight + 4;
-  const atTop = mainContent.scrollTop <= 4;
-  const contentFits = mainContent.scrollHeight <= mainContent.clientHeight;
-
-  const goNext = e.deltaY > 0 && (atBottom || contentFits);
-  const goPrev = e.deltaY < 0 && (atTop || contentFits);
-
-  if (!goNext && !goPrev) return;
-
-  e.preventDefault();
-
-  scrollNavCooldown = true;
-  setTimeout(() => { scrollNavCooldown = false; }, 600);
-
-  navigateGroup(goNext ? 1 : -1);
-}, { passive: false });
+mainContent.addEventListener("scroll", () => {
+  syncActiveGroupFromScroll();
+});

@@ -326,6 +326,31 @@ body {
   min-width: 0;
 }
 
+.group-section {
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid color-mix(in srgb, var(--group-border) 70%, transparent);
+}
+
+.group-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.group-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.group-section-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 10%, transparent);
+}
+
 .panel-header {
   display: flex;
   align-items: center;
@@ -535,30 +560,6 @@ body {
   border-bottom-right-radius: var(--border-radius-sm);
 }
 
-/* ===== ADD LINK BUTTON ===== */
-
-.add-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 10px;
-  border-radius: var(--border-radius-sm);
-  border: 1px dashed var(--input-border);
-  background: transparent;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--link-url);
-  margin-top: 6px;
-  width: 100%;
-  transition: all 0.15s;
-}
-
-.add-link:hover {
-  background: var(--btn-add-bg);
-  border-color: var(--input-focus);
-  color: var(--text);
-}
-
 /* ===== EMPTY STATE ===== */
 
 .empty-state {
@@ -696,7 +697,8 @@ body {
   color: var(--text);
 }
 
-.modal-field input {
+.modal-field input,
+.modal-field select {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid var(--input-border);
@@ -707,7 +709,8 @@ body {
   transition: border-color 0.15s;
 }
 
-.modal-field input:focus {
+.modal-field input:focus,
+.modal-field select:focus {
   outline: none;
   border-color: var(--input-focus);
 }
